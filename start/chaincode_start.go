@@ -86,14 +86,26 @@ func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string)
 // Query is our entry point for queries
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
+	var key, jsonResp string
+	var err error
 
-    // Handle different functions
-    if function == "fetch" {                            //read a variable
-        return t.fetch(stub, args)
+	if len(args) != 1 {
+        return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
     }
-    fmt.Println("query did not find func: " + function)
+	 key = args[0]
+    valAsbytes, err := stub.GetState(key)
+    if err != nil {
+        jsonResp = "{\"Error\":\"Failed to get state for " + key + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+    // Handle different functions
+    //if function == "fetch" {                            //read a variable
+        //return t.fetch(stub, args)
+   // }
+    //fmt.Println("query did not find func: " + function)
 
-    return nil, errors.New("Received unknown function query: " + function)
+    //return nil, errors.New("Received unknown function query: " + function)
+	return valAsbytes, nil
 }
 
 func (t *SimpleChaincode) fetch(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
